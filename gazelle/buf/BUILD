@@ -4,6 +4,33 @@ load("@bazel_gazelle//:def.bzl", "gazelle", "gazelle_binary")
 
 # gazelle:exclude testdata/*
 
+bzl_library(
+    name = "repositories",
+    srcs = ["repositories.bzl"],
+    visibility = ["//visibility:public"],
+    deps = ["@bazel_gazelle//:deps"],
+)
+
+# This gazelle binary is used exclusively for testing the gazelle language
+# extension.
+gazelle_binary(
+    name = "gazelle-buf",
+    languages = [
+        "@bazel_gazelle//language/proto:go_default_library",
+        ":buf",
+    ],
+    visibility = [
+        # Also make the binary available in the root of the repo for use, but
+        # not externally.
+        "//:__pkg__",
+    ],
+)
+
+gazelle(
+    name = "gazelle",
+    gazelle = ":gazelle-buf",
+)
+
 go_library(
     name = "buf",
     srcs = [
@@ -33,37 +60,10 @@ go_library(
     ],
 )
 
-bzl_library(
-    name = "repositories",
-    srcs = ["repositories.bzl"],
-    visibility = ["//visibility:public"],
-    deps = ["@bazel_gazelle//:deps"],
-)
-
-# This gazelle binary is used exclusively for testing the gazelle language
-# extension.
-gazelle_binary(
-    name = "gazelle-buf",
-    languages = [
-        "@bazel_gazelle//language/proto:go_default_library",
-        ":buf",
-    ],
-    visibility = [
-        # Also make the binary available in the root of the repo for use, but
-        # not externally.
-        "//:__pkg__",
-    ],
-)
-
-gazelle(
-    name = "gazelle",
-    gazelle = ":gazelle-buf",
-)
-
 go_test(
     name = "buf_test",
     srcs = ["buf_test.go"],
-    data = [":gazelle-buf"] + glob(["testdata/**"]),
+    data = glob(["testdata/**"]),
     deps = [
         "@bazel_gazelle//testtools:go_default_library",
         "@com_github_stretchr_testify//require",

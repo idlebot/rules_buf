@@ -32,6 +32,11 @@ gazelle(
     command = "update-repos",
 )
 
+gazelle(
+    name = "update_build_files",
+    gazelle = "//:gazelle",
+)
+
 stardoc(
     name = "buf_rule_docs",
     out = "buf-rules.md",
